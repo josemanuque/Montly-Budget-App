@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/main.css">
+    <title>Budget</title>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="budgetView.html">Add Expense</a></li>
+            <li><a href="categoryView.html">Categories</a></li>
+            <li id="appearanceToggle"><a>Toggle Appearance</a></li>
+        </ul>
+    </nav>
+    <h1>Monthly Expense Tracker</h1>
+    <div class="container">
+        <div class="categoriesHeader-container">
+            <h2>Categories</h2>
+            <button class="btn btn-primary right" id="openAddCategoryModalBtn" onclick="onAddCategory()">Add +</button>
+        </div>
+        <div class="card-container" id="categories-container"></div>
+    </div>
+    
+
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="../scripts/localStorageHandler.js"></script>
+    <script src="../scripts/dataHandler.js"></script>
+    <script src="../scripts/currencyAPI.js"></script>
+    <script src="../scripts/utils.js"></script>
+    <script src="../app.js"></script>
+</body>
+</html>

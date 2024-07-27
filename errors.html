@@ -1,0 +1,34 @@
+
+<div class="modal-header-container">
+    <h2>Add Expense</h2>
+    <button id="exitCategoriesModalBtn" class="btn btn-icon-only i-exit right" onclick="onCloseModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="icon-delete" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+        </svg>
+    </button>
+</div>
+<form action="">
+    <label for="name">Expense</label>
+    <input type="text" id="name" name="name">
+    <label for="money">Amount</label>
+    <input type="number" id="money" name="money">
+    <label for="currency">Currency</label>
+    <div class="select-wrapper">
+        
+    </div>
+    <label for="category">Category</label>
+    <div class="select-wrapper">
+        <select name="Category" id="category">
+            <option value="Food">Food</option>
+            <option value="Transport">Transport</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+    <label for="date">Date</label>
+    <input type="date" id="date" name="date">
+    <button class="btn btn-primary" id="addCategoryBtn">Add</button>
+</form>

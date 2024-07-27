@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+:root{
+    /* Light mode variables */
+    --background-color: #ffffff;
+    --text-color: #000000;
+    --nav-background-color: #333;
+    --nav-text-color: #fff;
+    --nav-hover-color: #111;
+    --table-background-color: #f8f8f8;
+
+
+    /* Dark mode variables */
+    --background-color-dark: #121212;
+    --text-color-dark: #e0e0e0;
+    --nav-background-color-dark: #1e1e1e;
+    --nav-text-color-dark: #e0e0e0;
+    --nav-hover-color-dark: #333;
+    --table-background-color-dark: #1e1e1e;
+    --modal-overlay-color: rgba(0, 0, 0, 0.8);
+    --modal-overlay-color-dark: rgba(41, 41, 41, 0.468);
+    
+
+    /* Color palette */
+    --primary-color-old: #007bff;
+    --primary-color: rgb(47, 146, 108);
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --card-color: rgba(85, 76, 76, 0.18);
+    --card-summary-color: rgba(88, 87, 103, 0.18);
+    --primary-text-color: #ffffff;
+    --primary-color-hover-old: #0056b3;
+    --primary-color-hover: rgb(28, 104, 71);
+    --danger-color-hover: #c82333;
+    --icn-color: #000000;
+    --icn-color-dark: #ffffff;
+    --icn-hover-color: rgba(0,0,0,0.1);
+    --icn-hover-color-dark: rgba(255,255,255,0.1);
+
+    /* Font */
+    --font-family-main: 'Open Sans', sans-serif;
+
+    /* Modals */
+    --modal-overlay-z-index: 1000;
+    --modal-z-index: calc(var(--modal-overlay-z-index) + 1);
+}
+
+[data-theme="dark"] {
+    --background-color: var(--background-color-dark);
+    --text-color: var(--text-color-dark);
+    --nav-background-color: var(--nav-background-color-dark);
+    --nav-text-color: var(--nav-text-color-dark);
+    --nav-hover-color: var(--nav-hover-color-dark);
+    --table-background-color: var(--table-background-color-dark);
+    --icn-hover-color: var(--icn-hover-color-dark);
+    --icn-color: var(--icn-color-dark);
+    --modal-overlay-color: var(--modal-overlay-color-dark);
+}
