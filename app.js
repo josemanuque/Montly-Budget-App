@@ -6,6 +6,7 @@ const CURRENCIES_KEY = "Currencies";
 // Selectors
 const CATEGORIES_SELECTOR = "categories-container";
 const MODAL_SELECTOR = "modal-overlay";
+const EXPENSES_SELECTOR = "table-container";
 
 
 function toggleAppearance(){
@@ -108,19 +109,23 @@ async function onAddExpense(){
             modalOverlay.classList.add("show");
         }
 
-        const form = document.getElementById("addExpenseForm");
+        const form = modal.querySelector("form");
+        console.log(form);
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 const formData = new FormData(form);
                 const expense = {
+                    name: formData.get("name"),
                     amount: formData.get("amount"),
                     currency: formData.get("currency"),
                     category: formData.get("category"),
                     date: formData.get("date"),
-                    description: formData.get("description")
+                    fAmount: ""
                 };
+                expense.fAmount = formatCurrency(expense.amount, expense.currency);
                 expensesAPI.addExpense(expense);
+                modalOverlay.classList.remove("show");
                 renderExpenses();
             });
         }
@@ -129,11 +134,61 @@ async function onAddExpense(){
     }
 }
 
+function formatCurrency(amount, currency){
+    try {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount);
+    }
+    catch (error) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: "USD" }).format(amount);
+    }
+}
+
+function onDeleteExpense(expense){
+    console.log(expense);
+    expensesAPI.deleteExpense(expense);
+    renderExpenses();
+}
+
+async function onEditExpense(expense){
+    const modal = await domAPI.generateEditExpenseModal(expense);
+    const modalOverlay = document.getElementById(MODAL_SELECTOR);
+    modalOverlay.innerHTML = "";
+    modalOverlay.appendChild(modal);
+    modalOverlay.classList.add("show");
+
+    const form = modal.querySelector("form");
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const newExpense = {
+            name: formData.get("name"),
+            amount: formData.get("amount"),
+            currency: formData.get("currency"),
+            category: formData.get("category"),
+            date: formData.get("date"),
+            fAmount: ""
+        };
+        newExpense.fAmount = formatCurrency(newExpense.amount, newExpense.currency);
+        expensesAPI.updateExpense(expense, newExpense);
+        modalOverlay.classList.remove("show");
+        renderExpenses();
+    });
+}
+
+function renderExpenses(){
+    const expenses = expensesAPI.getExpenses();
+    const expensesList = document.getElementById(EXPENSES_SELECTOR);
+    if(expensesList){
+        expensesList.innerHTML = "";
+        expensesList.appendChild(domAPI.generateExpensesTable(expenses));
+    }
+}
 
 function init(){
     handleAppearance();
     //categoriesListener();
     renderCategories();
+    renderExpenses();
 }
 
 init();

@@ -78,12 +78,18 @@ const currenciesAPI = (function(){
 
 
 const expensesAPI = (function(){
+    
+    function generateUniqueId() {
+        return uuid.v4();
+    }
 
     function addExpense(expense){
         const expenses = getExpenses();
+        expense.id = generateUniqueId();
         expenses.push(expense)
         saveData(EXPENSES_KEY, expenses);
     }
+
 
     function getExpenses(){
         const data = getData(EXPENSES_KEY);
@@ -95,8 +101,8 @@ const expensesAPI = (function(){
 
     function deleteExpense(expense){
         let expenses = getExpenses();
-        expenses = expenses.filter(e => e !== expense);
-        saveData(CATEGORIES_KEY, expenses);
+        expenses = expenses.filter(e => e.id !== expense.id);
+        saveData(EXPENSES_KEY, expenses);
     }
 
     function updateExpense(expenseToUpdate, newExpense){

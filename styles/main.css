@@ -58,7 +58,7 @@ nav ul li a:hover {
 .container_main {
     background-color: var(--card-color);
     border-radius: 1rem;
-    margin: 5rem;
+    margin: 5vw;
     padding: 1rem;
 }
 
@@ -105,7 +105,7 @@ table {
     margin: 0;
     padding: 0;
     width: 100%;
-    table-layout: fixed;
+    table-layout: fixed; /* Ensures fixed layout */
 }
 
 table caption {
@@ -123,15 +123,40 @@ table th,
 table td {
     padding: .625em;
     text-align: center;
+    overflow: hidden; /* Ensures text does not overflow */
+    text-overflow: ellipsis; /* Adds ellipsis for overflow text */
+    white-space: nowrap; /* Prevents text from wrapping */
 }
-  
+
 table th {
     font-size: .85em;
     letter-spacing: .1em;
     text-transform: uppercase;
 }
-  
-@media screen and (max-width: 600px) {
+
+/* Set specific widths for each column */
+table th:nth-child(1), table td:nth-child(1) {
+    width: 20vh; /* Adjust width as needed */
+}
+
+table th:nth-child(2), table td:nth-child(2) {
+    width: 20%; /* Adjust width as needed */
+}
+table th:nth-child(6), table td:nth-child(6) {
+    width: 12%; /* Adjust width as needed */
+}
+
+/* Add more column width definitions as needed */
+
+
+@media screen and (max-width: 800px) {
+    
+    table th:nth-child(1), table td:nth-child(1),
+    table th:nth-child(2), table td:nth-child(2),
+    table th:nth-child(6), table td:nth-child(6) {
+        width: auto; /* Override width to auto or any other value */
+    }
+
     table {
         border: 0;
     }
