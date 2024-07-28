@@ -20,17 +20,20 @@
         <div class="container_summary">
             <dl class="summary-text_dimensions">
                 <dt class="summary-title">Total Budget:</dt>
-                <dd id="totalBudgetValue">0</dd>
+                <dd id="total-budget-value">0</dd>
                 <dt class="summary-title">Expenses:</dt>
-                <dd id="totalExpensesValue">0</dd>
+                <dd id="total-expenses-value">0</dd>
                 <dt class="summary-title">Remaining:</dt>
-                <dd id="leftValue">0</dd>
+                <dd id="remaining-budget-value">0</dd>
             </dl>
         </div>
+        <div class="chart-container" style="position: relative; height:40vh; width:40vw">
+            <canvas id="summary-pie-chart"></canvas>
+        </div>
         <div class="container_options">
-            <button class="btn btn-large btn-primary">Edit Budget</button>
-            <button class="btn btn-large btn-primary">View Categories</button>
-            <button class="btn btn-large btn-primary">View Currency</button>
+            <button class="btn btn-large btn-primary" onclick="onSetBudget()">Set Budget</button>
+            <button class="btn btn-large btn-primary">Reset All</button>
+            <button class="btn btn-large btn-primary">Set Limit</button>
         </div>
         <div class="expensesHeader-container">
             <h2>Expenses</h2>
@@ -140,15 +143,14 @@
         </div>
     </div>
     
-    <div class="chart-container">
-        <canvas id="myPieChart"></canvas>
-    </div>
+    <!-- <canvas id=""></canvas> -->
+    
+    
 </body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
 <script src="scripts/localStorageHandler.js"></script>
 <script src="scripts/dataHandler.js"></script>
-<script src="scripts/currencyAPI.js"></script>
 <script src="scripts/utils.js"></script>
 <script src="app.js"></script>
 </html>

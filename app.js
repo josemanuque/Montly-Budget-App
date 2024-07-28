@@ -2,11 +2,15 @@ const CATEGORIES_KEY = "Categories";
 const EXPENSES_KEY = "Exp";
 const APPEARANCE_KEY = "Appearance";
 const CURRENCIES_KEY = "Currencies";
+const BUDGET_KEY = "Budget";
 
 // Selectors
 const CATEGORIES_SELECTOR = "categories-container";
 const MODAL_SELECTOR = "modal-overlay";
 const EXPENSES_SELECTOR = "table-container";
+const BUDGET_SELECTOR = "total-budget-value";
+const TOTAL_EXPENSES_SELECTOR = "total-expenses-value";
+const REMAINING_BUDGET_SELECTOR = "remaining-budget-value";
 
 
 function toggleAppearance(){
@@ -182,6 +186,43 @@ function renderExpenses(){
         expensesList.innerHTML = "";
         expensesList.appendChild(domAPI.generateExpensesTable(expenses));
     }
+    const budget = budgetAPI.getBudget();
+    domAPI.updateTotalExpenses(expenses);
+    domAPI.updateRemainingBudget(budget, expenses);
+}
+
+async function onSetBudget(){
+    console.log("Setting budget");
+    const currentBudget = budgetAPI.getBudget();
+    const modal = await domAPI.generateSetBudgetModal(currentBudget);
+    const modalOverlay = document.getElementById(MODAL_SELECTOR);
+    modalOverlay.innerHTML = "";
+    modalOverlay.appendChild(modal);
+    modalOverlay.classList.add("show");
+
+    const form = modal.querySelector("form");
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const amount = formData.get("amount");
+        const currency = formData.get("currency");
+        const budget = {amount: amount, currency: currency};
+        budgetAPI.setBudget(budget);
+        modalOverlay.classList.remove("show");
+        renderBudget();
+    });
+}
+
+function renderBudget(){
+    const budget = budgetAPI.getBudget();
+    console.log(budget);
+    const budgetElement = document.getElementById(BUDGET_SELECTOR);
+    if(budgetElement){
+        budgetElement.textContent = formatCurrency(budget.amount, budget.currency);
+    }
+    const expenses = expensesAPI.getExpenses();
+    domAPI.updateTotalExpenses(expenses);
+    domAPI.updateRemainingBudget(budget, expenses);
 }
 
 function init(){
@@ -189,6 +230,8 @@ function init(){
     //categoriesListener();
     renderCategories();
     renderExpenses();
+    renderBudget();
+    domAPI.generatePieChart();
 }
 
 init();

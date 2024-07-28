@@ -13,5 +13,5 @@ function getData(key){
 }
 
 function deleteData(key){
-
+    localStorage.removeItem(key);
 }

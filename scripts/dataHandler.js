@@ -110,8 +110,8 @@ const expensesAPI = (function(){
     }
 
     function updateExpense(expenseToUpdate, newExpense){
-        deleteCategory(expenseToUpdate);
-        addCategory(newExpense);
+        deleteExpense(expenseToUpdate);
+        addExpense(newExpense);
     }
 
     // Check if any expense has the given category
@@ -127,5 +127,46 @@ const expensesAPI = (function(){
         deleteExpense,
         updateExpense,
         hasCategory
+    }
+})();
+
+
+const budgetAPI = (function(){
+    
+    function setBudget(budget){
+        saveData(BUDGET_KEY, budget);
+    }
+
+    function getBudget(){
+        const data = getData(BUDGET_KEY);
+        if(data === null){
+            return {
+            amount: 0,
+            currency: "USD"
+        };
+        }
+        return data;
+    }
+
+    function resetBudget(){
+        const budget = {
+            amount: 0,
+            currency: "USD"
+        };
+
+        saveData(BUDGET_KEY, budget);
+    }
+
+    function updateBudget(budgetToUpdate, newBudget){
+        deleteBudget(budgetToUpdate);
+        addExpense(newBudget);
+    }
+
+
+    return {
+        setBudget,
+        getBudget,
+        resetBudget,
+        updateBudget
     }
 })();

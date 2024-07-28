@@ -196,6 +196,7 @@ const domAPI = (function(){
     }
 
     async function generateEditExpenseModal(expense) {
+        console.log(expense);
         try {
             const currencySelect = await generateCurrencySelect();
             const categorySelect = await generateCategorySelect();
@@ -213,7 +214,7 @@ const domAPI = (function(){
                     <label for="name">Expense</label>
                     <input type="text" id="name" name="name" value="${expense.name}">
                     <label for="amount">Amount</label>
-                    <input type="number" id="amount" name="amount" value="${expense.value}">
+                    <input type="number" id="amount" name="amount" value="${expense.amount}">
                     <label for="currency">Currency</label>
                     <div class="select-wrapper">
                         ${currencySelect.outerHTML}
@@ -223,7 +224,7 @@ const domAPI = (function(){
                         ${categorySelect.outerHTML}
                     </div>
                     <label for="date">Date</label>
-                    <input type="date" id="date" name="date" value="${expense.value}">
+                    <input type="date" id="date" name="date" value="${expense.date}">
                     <button class="btn btn-primary" id="addCategoryBtn">Add</button>
                 </form>
             `;
@@ -234,6 +235,52 @@ const domAPI = (function(){
         }
     }
 
+    async function generateSetBudgetModal(budget = "") {
+        if (budget === "") {
+            budget = {amount: 0, currency: "USD"};
+        }
+        try {
+            const currencySelect = await generateCurrencySelect();
+            const modalStr = `
+                <div class="modal-header-container">
+                    <h2>Set your Budget</h2>
+                    <button id="exitCategoriesModalBtn" class="btn btn-icon-only i-exit right" onclick="onCloseModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="icon-delete" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                        </svg>
+                    </button>
+                </div>
+                <form action="" id="addExpenseForm">
+                    <label for="name">Budget</label>
+                    <input type="number" id="amount" name="amount" value="${budget.amount}">
+                    <label for="currency">Currency</label>
+                    <div class="select-wrapper">
+                        ${currencySelect.outerHTML}
+                    </div>
+                    <button class="btn btn-primary">Set</button>
+                </form>
+            `;
+            return createNode(modalStr, "div", ["modal"]);
+        } catch (error) {
+            console.error('Error generating add expense modal:', error);
+            throw error;
+        }
+    }
+
+    function updateTotalExpenses(expenses){
+        const total = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+        const totalNode = document.getElementById("total-expenses-value");
+        totalNode.innerHTML = formatCurrency(total, "USD");;
+    }
+
+    function updateRemainingBudget(budget, expenses){
+        const total = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+        const remaining = budget.amount - total;
+        const remainingNode = document.getElementById("remaining-budget-value");
+        remainingNode.innerHTML = formatCurrency(remaining, budget.currency);
+    }
+
     function createNode(str, element, classes){
         const node = document.createElement(element);
         if(classes.length > 0)
@@ -242,6 +289,41 @@ const domAPI = (function(){
         return node;
     }
 
+    function generatePieChart(){
+        const ctx = document.getElementById('summary-pie-chart').getContext('2d');
+        const budget = budgetAPI.getBudget();
+        const expenses = expensesAPI.getExpenses();
+        const totalExpenses = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+        const remainingBudget = budget.amount - totalExpenses;
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Remaining Budget', 'Expenses'],
+                datasets: [{
+                    data: [remainingBudget, totalExpenses],
+                    backgroundColor: ['#28a745', '#dc3545'], // Green for remaining, Red for expenses
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${formatCurrency(tooltipItem.raw, budget.currency)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+
     return {
         createNode,
         generateCategoriesList,
@@ -249,6 +331,10 @@ const domAPI = (function(){
         generateAddCategoryModal,
         generateExpensesTable,
         generateAddExpenseModal,
-        generateEditExpenseModal
+        generateEditExpenseModal,
+        generateSetBudgetModal,
+        updateTotalExpenses,
+        updateRemainingBudget,
+        generatePieChart
     };
 })();
