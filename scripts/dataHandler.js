@@ -22,6 +22,10 @@ const categoriesAPI = (function(){
     }
 
     function deleteCategory(category){
+        if (expensesAPI.hasCategory(category.name)){
+            alert("Cannot delete category as it is in use");
+            return;
+        }
         let categories = getCategories();
         categories = categories.filter(c => c.name !== category.name);
         saveData(CATEGORIES_KEY, categories);
@@ -109,10 +113,19 @@ const expensesAPI = (function(){
         deleteCategory(expenseToUpdate);
         addCategory(newExpense);
     }
+
+    // Check if any expense has the given category
+    function hasCategory(category){
+        const expenses = getExpenses();
+        return expenses.some(expense => expense.category === category);
+    }
+
+
     return {
         addExpense,
         getExpenses,
         deleteExpense,
-        updateExpense
+        updateExpense,
+        hasCategory
     }
 })();
