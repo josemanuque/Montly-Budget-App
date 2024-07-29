@@ -1,4 +1,5 @@
 const domAPI = (function(){
+    let pieChartInstance = null;
 
     function generateCategoriesList(categories){
         const categoriesList = categories
@@ -34,7 +35,7 @@ const domAPI = (function(){
             </div>
             <form action="">
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name" value="${category.name}">
+                <input type="text" id="name" name="name" value="${category.name}" required>
                 <label for="color">Color</label>
                 <input type="color" id="color" name="color" value="${category.color}">
                 <button class="btn btn-primary" id="addCategoryBtn">Update</button>
@@ -56,7 +57,7 @@ const domAPI = (function(){
             </div>
             <form id="addCategoryForm" action="">
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name">
+                <input type="text" id="name" name="name" required>
                 <label for="color">Color</label>
                 <input type="color" id="color" name="color">
                 <button class="btn btn-primary" id="addCategoryBtn">Add</button>
@@ -76,13 +77,14 @@ const domAPI = (function(){
     
     function generateExpenseItem(expense){
         const expenseObj = JSON.stringify(expense);
+        //Format expense amount to currency
+        const amount = formatCurrency(expense.amount, expense.currency);
 
         const expenseStr = `
             <td data-label="Name">${expense.name}</td>
-            <td data-label="Amount">${expense.amount}</td>
+            <td data-label="Amount">${amount}</td>
             <td data-label="Currency">${expense.currency}</td>
             <td data-label="Date">${expense.date}</td>
-            <td data-label="Category">${expense.category}</td>
             <td data-label="Action">
             <button class="btn btn-icon-only" onclick="onEditExpense(${escapeHtml(JSON.stringify(expense))})">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
@@ -108,7 +110,6 @@ const domAPI = (function(){
                     <th>Amount</th>
                     <th>Currency</th>
                     <th>Date</th>
-                    <th>Category</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -126,13 +127,16 @@ const domAPI = (function(){
         return createNode(tableStr, "table", []);
     }
 
-    async function generateCurrencySelect(){
+    async function generateCurrencySelect(defaultCurrency = budgetAPI.getBudget().currency, classes = []){
         try {
             const currencies = await currenciesAPI.getCurrencies();
             const currencyOptions = Object.keys(currencies)
-                .map(currency => `<option value="${currency}">${currency}</option>`)
+                .map(currency => {
+                    const selected = currency === defaultCurrency ? 'selected' : '';
+                    return `<option value="${currency}" ${selected}>${currencies[currency]}</option>`;
+                })
                 .join("");
-            const selectNode = createNode(currencyOptions, "select", []);
+            const selectNode = createNode(currencyOptions, "select", classes);
             selectNode.setAttribute('name', 'currency'); // Set the name attribute here
             return selectNode;
         } catch (error) {
@@ -141,13 +145,17 @@ const domAPI = (function(){
         }
     }
 
-    async function generateCategorySelect(){
+    async function generateCategorySelect(showAllOption = false, classes = []) {
         try {
+            let categoryOptions = "";
+            if (showAllOption) {
+                categoryOptions += '<option value="all">All</option>';
+            }
             const categories = await categoriesAPI.getCategories();
-            const categoryOptions = categories
-                .map(cat => `<option value="${cat.name}">${cat.name}</option>`)
+            categoryOptions += categories
+                .map(category => `<option value="${category.id}">${category.name}</option>`)
                 .join("");
-            const selectNode = createNode(categoryOptions, "select", []);
+            const selectNode = createNode(categoryOptions, "select", classes);
             selectNode.setAttribute('name', 'category'); // Set the name attribute here
             return selectNode;
         } catch (error) {
@@ -172,9 +180,9 @@ const domAPI = (function(){
                 </div>
                 <form action="" id="addExpenseForm">
                     <label for="name">Expense</label>
-                    <input type="text" id="name" name="name">
+                    <input type="text" id="name" name="name" required>
                     <label for="amount">Amount</label>
-                    <input type="number" id="amount" name="amount">
+                    <input type="number" step="any" id="amount" name="amount" required>
                     <label for="currency">Currency</label>
                     <div class="select-wrapper">
                         ${currencySelect.outerHTML}
@@ -196,9 +204,9 @@ const domAPI = (function(){
     }
 
     async function generateEditExpenseModal(expense) {
-        console.log(expense);
         try {
-            const currencySelect = await generateCurrencySelect();
+            const currentCurrency = expense.currency;
+            const currencySelect = await generateCurrencySelect(currentCurrency);
             const categorySelect = await generateCategorySelect();
             const modalStr = `
                 <div class="modal-header-container">
@@ -212,9 +220,9 @@ const domAPI = (function(){
                 </div>
                 <form action="" id="addExpenseForm">
                     <label for="name">Expense</label>
-                    <input type="text" id="name" name="name" value="${expense.name}">
+                    <input type="text" id="name" name="name" value="${expense.name}" required>
                     <label for="amount">Amount</label>
-                    <input type="number" id="amount" name="amount" value="${expense.amount}">
+                    <input type="number" step="any" id="amount" name="amount" value="${expense.amount}" required>
                     <label for="currency">Currency</label>
                     <div class="select-wrapper">
                         ${currencySelect.outerHTML}
@@ -253,7 +261,7 @@ const domAPI = (function(){
                 </div>
                 <form action="" id="addExpenseForm">
                     <label for="name">Budget</label>
-                    <input type="number" id="amount" name="amount" value="${budget.amount}">
+                    <input type="number" step="any" id="amount" name="amount" value="${budget.amount}" required>
                     <label for="currency">Currency</label>
                     <div class="select-wrapper">
                         ${currencySelect.outerHTML}
@@ -268,17 +276,20 @@ const domAPI = (function(){
         }
     }
 
-    function updateTotalExpenses(expenses){
-        const total = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+    
+    async function updateTotalExpenses(value) {
+        const budgetCurrency = budgetAPI.getBudget().currency;
+    
         const totalNode = document.getElementById("total-expenses-value");
-        totalNode.innerHTML = formatCurrency(total, "USD");;
+        if(totalNode)
+            totalNode.innerHTML = formatCurrency(value, budgetCurrency);
     }
 
-    function updateRemainingBudget(budget, expenses){
-        const total = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
-        const remaining = budget.amount - total;
+    async function updateRemainingBudget(value){
+        const budget = budgetAPI.getBudget();
         const remainingNode = document.getElementById("remaining-budget-value");
-        remainingNode.innerHTML = formatCurrency(remaining, budget.currency);
+        if(remainingNode)
+            remainingNode.innerHTML = formatCurrency(value, budget.currency);
     }
 
     function createNode(str, element, classes){
@@ -289,20 +300,28 @@ const domAPI = (function(){
         return node;
     }
 
-    function generatePieChart(){
-        const ctx = document.getElementById('summary-pie-chart').getContext('2d');
-        const budget = budgetAPI.getBudget();
-        const expenses = expensesAPI.getExpenses();
-        const totalExpenses = expenses.reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
-        const remainingBudget = budget.amount - totalExpenses;
+    function generatePieChart(totalExpenses, remainingBudget){
+        const pieChartCanvas = document.getElementById('summary-pie-chart');
+        if(!pieChartCanvas) return;
+        const ctx = pieChartCanvas.getContext('2d');
+        let borderWidth = 1;
+        if(remainingBudget < 0){
+            remainingBudget = 0;
+            borderWidth = 0;
+        }
 
-        new Chart(ctx, {
+        // Destroy existing chart instance if it exists
+        if (pieChartInstance) {
+            pieChartInstance.destroy();
+        }
+        pieChartInstance = new Chart(ctx, {
             type: 'pie',
             data: {
                 labels: ['Remaining Budget', 'Expenses'],
                 datasets: [{
                     data: [remainingBudget, totalExpenses],
                     backgroundColor: ['#28a745', '#dc3545'], // Green for remaining, Red for expenses
+                    borderWidth: borderWidth
                 }]
             },
             options: {
@@ -324,6 +343,87 @@ const domAPI = (function(){
         });
     };
 
+    function getCategorySummary(){
+        // Get categories from categoriesAPI
+        const categories = categoriesAPI.getCategories();
+        const expenses = expensesAPI.getExpenses();
+
+        const categoryData = categories.map(category => {
+            const totalAmount = expenses
+                .filter(expense => expense.category === category.id)
+                .reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+            return {
+                name: category.name,
+                amount: totalAmount,
+                color: category.color
+            };
+        });
+
+        return categoryData;
+    }
+
+    function generateCategoriesChart(){
+        
+        const pieChartCanvas = document.getElementById('categories-pie-chart');
+        if(!pieChartCanvas) return;
+        const ctx = pieChartCanvas.getContext('2d');
+        let borderWidth = 1;
+        const budget = budgetAPI.getBudget();
+
+        const categoryData = getCategorySummary();
+        const labels = categoryData.map(data => data.name);
+        const data = categoryData.map(data => data.amount);
+        const backgroundColors = categoryData.map(data => data.color);
+    
+        // Destroy existing chart instance if it exists
+        if (pieChartInstance) {
+            pieChartInstance.destroy();
+        }
+        pieChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColors, // Green for remaining, Red for expenses
+                    borderWidth: borderWidth
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${formatCurrency(tooltipItem.raw, budget.currency)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    async function updateTotalExpensesPerCategory(categoryId){
+        let valueStr = "Not selected";
+        if(categoryId !== "all"){
+            const filteredExpenses = expensesAPI.getExpensesByCategory(categoryId);
+            const total = await expensesAPI.calculateTotalExpenses(undefined, filteredExpenses);
+            console.log('Total expenses for category:', total);
+            const budgetCurrency = budgetAPI.getBudget().currency;
+            valueStr = formatCurrency(total, budgetCurrency);
+        }
+        
+        const totalNode = document.getElementById("total-category-value");
+        if(totalNode)
+            totalNode.innerHTML = valueStr;
+    };
+
+
     return {
         createNode,
         generateCategoriesList,
@@ -335,6 +435,10 @@ const domAPI = (function(){
         generateSetBudgetModal,
         updateTotalExpenses,
         updateRemainingBudget,
-        generatePieChart
+        generatePieChart,
+        generateCurrencySelect,
+        generateCategoriesChart,
+        generateCategorySelect,
+        updateTotalExpensesPerCategory
     };
 })();

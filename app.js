@@ -11,6 +11,11 @@ const EXPENSES_SELECTOR = "table-container";
 const BUDGET_SELECTOR = "total-budget-value";
 const TOTAL_EXPENSES_SELECTOR = "total-expenses-value";
 const REMAINING_BUDGET_SELECTOR = "remaining-budget-value";
+const OVERVIEW_CURRENCY_SELECTOR = "overview-currency-value";
+const OVERVIEW_CURRENCY_DROPDOWN_SELECTOR = "currency-overview-dropdown";
+const OVERVIEW_CATEGORY_SELECTOR = "overview-category-value";
+const OVERVIEW_CATEGORY_DROPDOWN_SELECTOR = "category-overview-dropdown";
+const TOTAL_CATEGORY_SELECTOR = "total-category-value";
 
 
 function toggleAppearance(){
@@ -26,22 +31,36 @@ function toggleAppearance(){
 
 function setAppearance(value){
     document.documentElement.setAttribute("data-theme",value);
+    saveData(APPEARANCE_KEY, value);
 }
 
 function handleAppearance(){
     // Handle toggle click
-    document.getElementById("appearanceToggle").addEventListener("click", () => toggleAppearance());
+    const themeSelect = document.getElementById("theme-select")
 
     // Check if user has set a preference
     document.documentElement.getAttribute("data-theme") === "dark" ? document.documentElement.setAttribute("data-theme","dark") : document.documentElement.setAttribute("data-theme","light");
     const appearance = getData(APPEARANCE_KEY);
     if(appearance === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         setAppearance("dark");
-        return;
+        //return;
     } else if(appearance === "light" || appearance === "dark"){
+        
         setAppearance(appearance);
-        return;
+        //return;
     }
+
+    if(themeSelect){
+        themeSelect.addEventListener("change", (e) => setAppearance(e.target.value));
+        for (let i = 0; i < themeSelect.options.length; i++) {
+            console.log(themeSelect.options[i].value);
+            if (themeSelect.options[i].value === appearance) {
+                themeSelect.options[i].selected = true;
+                break;
+            }
+        }
+    }
+
 }
 
 function onEditCategory(category){
@@ -114,8 +133,15 @@ async function onAddExpense(){
         }
 
         const form = modal.querySelector("form");
-        console.log(form);
+    
         if (form) {
+            const amountInput = document.querySelector('#amount');
+            amountInput.addEventListener('input', () => {
+                if (amountInput.validity.customError) {
+                    amountInput.setCustomValidity('');
+                }
+            });
+        
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 const formData = new FormData(form);
@@ -127,6 +153,11 @@ async function onAddExpense(){
                     date: formData.get("date"),
                     fAmount: ""
                 };
+                if(expense.amount <= 0){
+                    amountInput.setCustomValidity('Amount must be greater than 0');
+                    amountInput.reportValidity();
+                    return;
+                }
                 expense.fAmount = formatCurrency(expense.amount, expense.currency);
                 expensesAPI.addExpense(expense);
                 modalOverlay.classList.remove("show");
@@ -179,16 +210,45 @@ async function onEditExpense(expense){
     });
 }
 
-function renderExpenses(){
+function onChangeCategory(selectElement){
+    const category = selectElement.value;
+    if (category === "all") {
+        renderExpenseSummary(category);
+        renderExpenses();
+        return;
+    }
+    const expenses = expensesAPI.getExpenses();
+    const filteredExpenses = expenses.filter(e => e.category === category);
+    
+    const expensesList = document.getElementById(EXPENSES_SELECTOR);
+    if(expensesList){
+        expensesList.innerHTML = "";
+        expensesList.appendChild(domAPI.generateExpensesTable(filteredExpenses));
+    }
+    renderBudget();
+    renderExpenseSummary(category);
+}
+
+function renderExpenseSummary(category){
+    domAPI.updateTotalExpensesPerCategory(category);
+}
+
+
+async function renderExpenses(){
     const expenses = expensesAPI.getExpenses();
     const expensesList = document.getElementById(EXPENSES_SELECTOR);
     if(expensesList){
         expensesList.innerHTML = "";
         expensesList.appendChild(domAPI.generateExpensesTable(expenses));
     }
-    const budget = budgetAPI.getBudget();
-    domAPI.updateTotalExpenses(expenses);
-    domAPI.updateRemainingBudget(budget, expenses);
+    renderOverviewInfo();
+    const currencyOptions = await domAPI.generateCategorySelect(true, ["small-dropdown"]);
+    const currencyParent = document.getElementById(OVERVIEW_CATEGORY_SELECTOR); 
+    if(currencyParent){
+        currencyParent.innerHTML = "";
+        currencyParent.appendChild(currencyOptions);
+        currencyParent.addEventListener("change", (e) => onChangeCategory(e.target));
+    }
 }
 
 async function onSetBudget(){
@@ -213,25 +273,116 @@ async function onSetBudget(){
     });
 }
 
-function renderBudget(){
+async function onChangeCurrency(selectElement){
+    const currency = selectElement.value;
+    let budget = budgetAPI.getBudget();
+    budget = await budgetAPI.convertBudget(budget, currency);
+    budgetAPI.setBudget(budget);
+    renderBudget();
+}
+
+async function renderOverviewInfo(){
     const budget = budgetAPI.getBudget();
-    console.log(budget);
+    const expenses = expensesAPI.getExpenses();
+    const totalExpenses = await expensesAPI.calculateTotalExpenses(budget.currency, expenses);
+    const remaining = budget.amount - totalExpenses;
+    domAPI.updateTotalExpenses(totalExpenses);
+    domAPI.updateRemainingBudget(remaining);
+    domAPI.generatePieChart(totalExpenses, remaining);
+    domAPI.generateCategoriesChart();
+}
+
+async function renderBudget(){
+    const budget = budgetAPI.getBudget();
     const budgetElement = document.getElementById(BUDGET_SELECTOR);
     if(budgetElement){
         budgetElement.textContent = formatCurrency(budget.amount, budget.currency);
     }
     const expenses = expensesAPI.getExpenses();
-    domAPI.updateTotalExpenses(expenses);
-    domAPI.updateRemainingBudget(budget, expenses);
+    await renderOverviewInfo();
+    const currencyOptions = await domAPI.generateCurrencySelect(undefined, ["small-dropdown"]);
+    const currencyParent = document.getElementById(OVERVIEW_CURRENCY_SELECTOR); 
+    if(currencyParent){
+        currencyParent.innerHTML = "";
+        currencyParent.appendChild(currencyOptions);
+        currencyParent.addEventListener("change", (e) => onChangeCurrency(e.target));
+    }
+}
+
+
+function onResetAll(){
+    if(confirm("Are you sure you want to reset all data?")){
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+function onExportLocalStorage() {
+    // Retrieve all data from local storage
+    const localStorageData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        localStorageData[key] = localStorage.getItem(key);
+    }
+
+    // Convert the data to a JSON string
+    const jsonString = JSON.stringify(localStorageData, null, 2);
+
+    // Create a Blob from the JSON string
+    const blob = new Blob([jsonString], { type: 'application/json' });
+
+    // Create a link element
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'localStorageData.json';
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up the URL object
+    URL.revokeObjectURL(link.href);
+}
+
+
+function onImportLocalStorage() {
+    document.querySelector('#importLocalStorageInput').click();
+}
+
+
+function handleFileImport(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                for (const key in importedData) {
+                    if (importedData.hasOwnProperty(key)) {
+                        localStorage.setItem(key, importedData[key]);
+                    }
+                }
+                alert('Local storage imported successfully!');
+                location.reload();
+            } catch (error) {
+                alert('Failed to import local storage: Invalid JSON file.');
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
+function initializeImportListener() {
+    const importInput = document.querySelector('#importLocalStorageInput');
+    if (importInput)
+        importInput.addEventListener('change', handleFileImport);
 }
 
 function init(){
     handleAppearance();
-    //categoriesListener();
     renderCategories();
     renderExpenses();
     renderBudget();
-    domAPI.generatePieChart();
+    initializeImportListener();
 }
 
 init();

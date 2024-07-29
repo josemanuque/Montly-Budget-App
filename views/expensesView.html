@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="../styles/main.css">
     <title>Monthly Expense Tracker</title>
 </head>
 <body>
     <nav>
         <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="./views/expensesView.html">Expenses Summary</a></li>
-            <li><a href="./views/categoriesView.html">Categories</a></li>
-            <li><a href="./views/settings.html">Settings</a></li>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="expensesView.html">Expenses Summary</a></li>
+            <li><a href="categoriesView.html">Categories</a></li>
+            <li><a href="settings.html">Settings</a></li>
         </ul>
     </nav>
     <h1>Monthly Expense Tracker</h1>
@@ -20,31 +20,25 @@
         <div class="card-container">
             <div class="card-container overview-container">
                 <div class="overview-details">
+                    <h2>Expenses Summary</h2>
                     <dl class="summary-text_dimensions">
-                        <dt class="summary-title">Total Budget:</dt>
-                        <dd id="total-budget-value">0</dd>
-                        <dt class="summary-title">Expenses:</dt>
+                        <dt class="summary-title">Total Expenses:</dt>
                         <dd id="total-expenses-value">0</dd>
-                        <dt class="summary-title">Remaining:</dt>
-                        <dd id="remaining-budget-value">0</dd>
-                        <dt class="summary-title">Currency:</dt>
-                        <dd id="overview-currency-value">
+                        <dt class="summary-title">Total Category:</dt>
+                        <dd id="total-category-value">Not selected</dd>
+                        <dt class="summary-title">Category:</dt>
+                        <dd id="overview-category-value">
                             <select class="small-dropdown" name="" id="currency-overview-dropdown">
-                                <option value="">USD</option>
+                                <!-- <option value="">All</option> -->
                             </select>
                         </dd>
                     </dl>
                 </div>
                 <div class="chart-container">
-                    <canvas id="summary-pie-chart"></canvas>
+                    <canvas id="categories-pie-chart"></canvas>
                 </div>
             </div>
             
-            <div class="btn-container-main">
-                <button class="btn btn-large btn-primary" onclick="onSetBudget()">Set Budget</button>
-                <button class="btn btn-large btn-primary" onclick="onExportLocalStorage()">Export</button>
-                <button class="btn btn-large btn-primary" onclick="onResetAll()">Reset All</button>
-            </div>
             <div class="expensesHeader-container">
                 <h2>Expenses</h2>
                 <button class="btn btn-primary right" id="addExpenseBtn" onclick="onAddExpense()">Add +</button>
@@ -65,8 +59,8 @@
 </body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-<script src="scripts/localStorageHandler.js"></script>
-<script src="scripts/dataHandler.js"></script>
-<script src="scripts/utils.js"></script>
-<script src="app.js"></script>
+<script src="../scripts/localStorageHandler.js"></script>
+<script src="../scripts/dataHandler.js"></script>
+<script src="../scripts/utils.js"></script>
+<script src="../app.js"></script>
 </html>

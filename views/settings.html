@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles/main.css">
+    <title>Settings</title>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="expensesView.html">Expenses Summary</a></li>
+            <li><a href="categoriesView.html">Categories</a></li>
+            <li><a href="settings.html">Settings</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>Settings</h1>
+
+        <div class="card-container">
+            <!-- Appearance Settings -->
+        <section class="settings-section">
+            <h2>Appearance</h2>
+            <div class="settings-item">
+                <label for="theme-select">Theme:</label>
+                <select class="small-dropdown" id="theme-select">
+                    <option id="appearance-light-option" value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Import/Export Settings -->
+        <section class="settings-section">
+            <h2>Import/Export</h2>
+                <button class="btn btn-primary" onclick="onExportLocalStorage()">Export Local Storage</button>
+                <input type="file" id="importLocalStorageInput" style="display: none;" accept=".json">
+                <button class="btn btn-primary" onclick="onImportLocalStorage()">Import Local Storage</button>
+        </section>
+        </div>
+    </div>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+<script src="../scripts/localStorageHandler.js"></script>
+<script src="../scripts/dataHandler.js"></script>
+<script src="../scripts/utils.js"></script>
+<script src="../app.js"></script>
+</html>

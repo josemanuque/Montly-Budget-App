@@ -8,6 +8,11 @@
     --nav-text-color: #fff;
     --nav-hover-color: #111;
     --table-background-color: #f8f8f8;
+    --modal-overlay-color: rgba(0, 0, 0, 0.8);
+    --input-border-color: #ced4da;
+    --input-border-color-focus: #007bff;
+    --input-border-color-error: #dc3545;
+    --input-background-color: #f9f9f9;
 
 
     /* Dark mode variables */
@@ -17,9 +22,8 @@
     --nav-text-color-dark: #e0e0e0;
     --nav-hover-color-dark: #333;
     --table-background-color-dark: #1e1e1e;
-    --modal-overlay-color: rgba(0, 0, 0, 0.8);
     --modal-overlay-color-dark: rgba(41, 41, 41, 0.468);
-    
+    --select-background-color-dark: #333;
 
     /* Color palette */
     --primary-color-old: #007bff;
@@ -30,7 +34,7 @@
     --warning-color: #ffc107;
     --info-color: #17a2b8;
     --card-color: rgba(85, 76, 76, 0.18);
-    --card-summary-color: rgba(88, 87, 103, 0.18);
+    --card-overview-color: rgba(88, 87, 103, 0.18);
     --primary-text-color: #ffffff;
     --primary-color-hover-old: #0056b3;
     --primary-color-hover: rgb(28, 104, 71);
@@ -58,4 +62,5 @@
     --icn-hover-color: var(--icn-hover-color-dark);
     --icn-color: var(--icn-color-dark);
     --modal-overlay-color: var(--modal-overlay-color-dark);
+    --select-background-color: var(--select-background-color-dark);
 }

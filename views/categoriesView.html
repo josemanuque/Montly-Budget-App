@@ -10,9 +10,9 @@
     <nav>
         <ul>
             <li><a href="../index.html">Home</a></li>
-            <li><a href="budgetView.html">Add Expense</a></li>
-            <li><a href="categoryView.html">Categories</a></li>
-            <li id="appearanceToggle"><a>Toggle Appearance</a></li>
+            <li><a href="expensesView.html">Expenses Summary</a></li>
+            <li><a href="categoriesView.html">Categories</a></li>
+            <li><a href="settings.html">Settings</a></li>
         </ul>
     </nav>
     <h1>Monthly Expense Tracker</h1>
@@ -21,13 +21,14 @@
             <h2>Categories</h2>
             <button class="btn btn-primary right" id="openAddCategoryModalBtn" onclick="onAddCategory()">Add +</button>
         </div>
-        <div class="card-container" id="categories-container"></div>
+        <div class="card-container categories-card" id="categories-container"></div>
     </div>
     
 
     <div id="modal-overlay" class="modal-overlay"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
     <script src="../scripts/localStorageHandler.js"></script>
     <script src="../scripts/dataHandler.js"></script>
     <script src="../scripts/utils.js"></script>
