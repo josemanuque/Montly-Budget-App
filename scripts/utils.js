@@ -343,26 +343,34 @@ const domAPI = (function(){
         });
     };
 
-    function getCategorySummary(){
+    async function getCategorySummary() {
         // Get categories from categoriesAPI
         const categories = categoriesAPI.getCategories();
         const expenses = expensesAPI.getExpenses();
-
-        const categoryData = categories.map(category => {
-            const totalAmount = expenses
+        const budget = budgetAPI.getBudget();
+    
+        const categoryData = await Promise.all(categories.map(async category => {
+            const totalAmount = await expenses
                 .filter(expense => expense.category === category.id)
-                .reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+                .reduce(async (accPromise, curr) => {
+                    const acc = await accPromise;
+                    // Assuming all expenses should be converted to a base currency, e.g., 'USD'
+                    const baseCurrency = budget.currency;
+                    const amountInBaseCurrency = curr.currency !== baseCurrency 
+                        ? await currenciesAPI.convert(parseFloat(curr.amount), curr.currency, baseCurrency)
+                        : parseFloat(curr.amount);
+                    return acc + amountInBaseCurrency;
+                }, Promise.resolve(0));
             return {
                 name: category.name,
                 amount: totalAmount,
                 color: category.color
             };
-        });
-
+        }));
         return categoryData;
     }
 
-    function generateCategoriesChart(){
+    async function generateCategoriesChart(){
         
         const pieChartCanvas = document.getElementById('categories-pie-chart');
         if(!pieChartCanvas) return;
@@ -370,7 +378,7 @@ const domAPI = (function(){
         let borderWidth = 1;
         const budget = budgetAPI.getBudget();
 
-        const categoryData = getCategorySummary();
+        const categoryData = await getCategorySummary();
         const labels = categoryData.map(data => data.name);
         const data = categoryData.map(data => data.amount);
         const backgroundColors = categoryData.map(data => data.color);
@@ -417,7 +425,7 @@ const domAPI = (function(){
             const budgetCurrency = budgetAPI.getBudget().currency;
             valueStr = formatCurrency(total, budgetCurrency);
         }
-        
+
         const totalNode = document.getElementById("total-category-value");
         if(totalNode)
             totalNode.innerHTML = valueStr;
